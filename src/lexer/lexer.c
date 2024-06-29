@@ -93,7 +93,7 @@ Token lexer_next(Lexer *lexer) {
         case ';': TOKEN(SEMICOLON);
         case '.': if (!isnumber(*(lexer->c + 1))) TOKEN(DOT);
         default: {
-            unsigned char width = utf8_width(*lexer->c);
+            int width = utf8_width(*lexer->c);
 
             if (isalpha(*lexer->c) || *lexer->c == '_' || width != 1) {
                 bool can_be_keyword = isalpha(*lexer->c);
@@ -112,33 +112,103 @@ Token lexer_next(Lexer *lexer) {
                 token.kind = TOKEN_NUMBER;
 
                 if (COMPARE_DIGRAPH("0x") || COMPARE_DIGRAPH("0X")) {
-                    token.radix = 16;
-                    lexer->c += 2, lexer->column += 2;
+                    lexer_scan_hex(lexer, &token);
                 } else if (COMPARE_DIGRAPH("0b") || COMPARE_DIGRAPH("0B")) {
-                    lexer_parse_binary(lexer, &token);
+                    lexer_scan_binary(lexer, &token);
                 } else if (COMPARE_DIGRAPH("0o") || COMPARE_DIGRAPH("0O")) {
-                    lexer_parse_octal(lexer, &token);
+                    lexer_scan_octal(lexer, &token);
                 } else {
                     if (*lexer->c == '0' && isdigit(*(lexer->c + 1))) {
-                        fprintf(stderr, "ERROR %s:%zu:%zu: Unexpected character '%c'\n", lexer->filename, lexer->line, lexer->column, *lexer->c);
-                        exit(1);
+                        ERROR("Unexpected recurring 0 in numeric literal\n");
                     }
 
-                    lexer_parse_decimal(lexer, &token);
+                    lexer_scan_decimal(lexer, &token);
                 }
 
                 if (!is_huggable(*lexer->c)) {
-                    fprintf(stderr, "ERROR %s:%zu:%zu: Unexpected character %c\n", lexer->filename, lexer->line, lexer->column, *lexer->c);
-                    exit(1);
+                    ERROR("Unexpected character `%c` after numeric literal\n", *lexer->c);
                 }
+
+                return token;
+            } else if (*lexer->c == '\'') {
+                token.kind = TOKEN_RUNE;
+                advance();
+
+                if (*lexer->c == '\\') {
+                    lexer_escape_sequence(lexer);
+                } else {
+                    lexer->c += utf8_width(*lexer->c);
+                    lexer->column++;
+                }
+
+                if (*lexer->c != '\'') {
+                    ERROR("Expected closing `\'` for rune literal\n");
+                }
+
+                advance();
+
+                token.end = lexer->c;
 
                 return token;
             }
         }
     }
 
-    fprintf(stderr, "ERROR %s:%zu:%zu: Unexpected character '%c'\n", lexer->filename, lexer->line, lexer->column, *lexer->c);
-    exit(1);
+    ERROR("Unexpected character `%c`\n", *lexer->c);
+}
+
+void lexer_escape_sequence(Lexer *lexer) {
+    assert(*lexer->c == '\\');
+    advance();
+
+    switch (*lexer->c) {
+        case '\\':
+        case '\'':
+        case '"':
+        case 'n':
+        case 'r':
+        case 't':
+        case '0': advance(); break;
+        case 'x': {
+            advance();
+
+            if (!isxdigit(*lexer->c)) {
+                ERROR("Expected hexadecimal digit after `\\x`\n");
+            }
+            advance();
+            if (!isxdigit(*lexer->c)) {
+                ERROR("Expected hexadecimal digit after `\\x%c`\n", *(lexer->c - 1));
+            }
+
+            advance();
+
+            break;
+        }
+        case 'U':
+        case 'u': {
+            advance();
+
+            if (*lexer->c != '{') {
+                ERROR("Expected `{` after `\\%c`\n", *(lexer->c - 1));
+            }
+
+            advance();
+            for (size_t i = 0; i < 4; i++) {
+                if (!isxdigit(*lexer->c)) {
+                    ERROR("Expected hexadecimal digit in unicode escape sequence\n");
+                }
+                advance();
+            }
+
+            if (*lexer->c != '}') {
+                ERROR("Expected `}` after unicode escape sequence\n");
+            }
+
+            advance();
+            break;
+        }
+        default: ERROR("Unknown escape sequence `\\%c`\n", *lexer->c);
+    }
 }
 
 void lexer_skip_whitespace(Lexer *lexer) {
@@ -215,7 +285,7 @@ char *token_kind_to_name(TokenKind kind) {
         CASE(IDENTIFIER)
         CASE(NUMBER)
         CASE(STRING)
-        CASE(CHAR)
+        CASE(RUNE)
         CASE(LPAREN)
         CASE(RPAREN)
         CASE(LBRACE)

@@ -1,3 +1,38 @@
+### Numeric literals
+
+Every numeric literal can contain underscores `_` or single quotes `'` to improve readability – those characters
+are ignored by the compiler. They must be placed between two digits.  
+All numeric integer 
+constants are the smallest type that can hold the value (excluding byte). For example, `1` is an `int`, 
+`2'147'483'648` is a `long`.
+
+```ebnf
+integer_literal ::= decimal_literal | hexadecimal_literal | binary_literal | octal_literal
+
+decimal_digit ::= "0" ... "9"
+decimal_literal ::= 
+    | "0" 
+    | ( "1" ... "9" ) { decimal_digit }
+
+binary_digit ::= "0" | "1"
+binary_literal ::= "0" ( "b" | "B" ) { binary_digit }
+
+octal_digit ::= "0" ... "7"
+octal_literal ::= "0" ( "o" | "O" ) { octal_digit }
+
+hexadecimal_digit ::= "0" ... "9" | "a" ... "f" | "A" ... "F"
+hexadecimal_literal ::= "0" ( "x" | "X" ) { hexadecimal_digit }
+```
+
+### Numeric types
+- Integers
+  - `byte` (8-bit signed integer)
+  - `int` (32-bit signed integer)
+  - `long` (64-bit signed integer)
+- Floating point
+  - `float` (32-bit floating point)
+  - `double` (64-bit floating point)
+
 ### Possible escape sequences within a string literal
 
 | Sequence     | Output             |

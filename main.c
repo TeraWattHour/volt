@@ -11,6 +11,10 @@ int main(void) {
         if (token.kind == TOKEN_EOF) {
             break;
         }
+
+        if (token.kind == TOKEN_NUMBER && token.radix == 16) {
+            printf("Hexadecimal number, core: %.*s, mantissa: %.*s, exponent: %.*s \n", (int)(token.hex_literal.mantissa_start - 1 - token.start - 2), token.start + 2, (int)(token.hex_literal.exponent_start - 1 - token.hex_literal.mantissa_start), token.hex_literal.mantissa_start, (int)(token.end - token.hex_literal.exponent_start), token.hex_literal.exponent_start);
+        }
     }
 
     lexer_free(&lexer);

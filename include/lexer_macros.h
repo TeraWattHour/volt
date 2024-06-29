@@ -2,7 +2,12 @@
 #define VOLT_LEXER_MACROS_H
 
 #define advance() lexer->c++, lexer->column++
-#define ERROR(message, ...) fprintf(stderr, "ERROR %s:%zu:%zu: " message, lexer->filename, lexer->line, lexer->column, __VA_ARGS__), exit(1)
+#define ERROR(...) do { \
+    fprintf(stderr, "ERROR %s:%zu:%zu: ", lexer->filename, lexer->line, lexer->column); \
+    fprintf(stderr, __VA_ARGS__); \
+    fprintf(stderr, "\n"); \
+    exit(1); \
+} while (0)
 #define TOKEN(name) return (Token) { .kind = TOKEN_##name, .start = lexer->c, .end = lexer->c++, .line = lexer->line, .column = lexer->column++ }
 #define TOKEN2(name, a)                                                                                                \
     do                                                                                                                 \

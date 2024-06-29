@@ -22,7 +22,7 @@ typedef enum {
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
     TOKEN_STRING,
-    TOKEN_CHAR,
+    TOKEN_RUNE,
     TOKEN_LPAREN,
     TOKEN_RPAREN,
     TOKEN_LBRACE,
@@ -63,6 +63,12 @@ typedef struct {
     union {
         int radix;
     };
+    union {
+        struct {
+            char *mantissa_start;
+            char *exponent_start;
+        } hex_literal;
+    };
 } Token;
 
 typedef struct {
@@ -74,13 +80,14 @@ Lexer lexer_init(const char *filename);
 Token lexer_next(Lexer *lexer);
 int lexer_free(Lexer *lexer);
 
-void lexer_parse_decimal(Lexer *lexer, Token *token);
-void lexer_parse_hex(Lexer *lexer, Token *token);
-void lexer_parse_octal(Lexer *lexer, Token *token);
-void lexer_parse_binary(Lexer *lexer, Token *token);
+void lexer_scan_decimal(Lexer *lexer, Token *token);
+void lexer_scan_hex(Lexer *lexer, Token *token);
+void lexer_scan_octal(Lexer *lexer, Token *token);
+void lexer_scan_binary(Lexer *lexer, Token *token);
 
 void lexer_skip_whitespace(Lexer *lexer);
 void lexer_scan_digits(Lexer *lexer, int base);
+void lexer_escape_sequence(Lexer *lexer);
 
 bool is_digit(char c, int radix);
 bool is_spacer(char c);

@@ -5,5 +5,4 @@
 
 int utf8_width(unsigned char c);
 
-
 #endif //VOLT_UTF8_H
