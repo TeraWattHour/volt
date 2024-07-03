@@ -1,11 +1,7 @@
 ### Numeric literals
 
 Every numeric literal can contain underscores `_` or single quotes `'` to improve readability – those characters
-are ignored by the compiler. They must be placed between two digits.  
-All numeric integer 
-constants are the smallest type that can hold the value (excluding byte). For example, `1` is an `int`, 
-`2'147'483'648` is a `long`.
-
+are ignored by the compiler. They must be placed between two digits. All integer numeric literals are `i64` by default, floats are `f64`.
 ```ebnf
 integer_literal ::= decimal_literal | hexadecimal_literal | binary_literal | octal_literal
 
@@ -26,12 +22,12 @@ hexadecimal_literal ::= "0" ( "x" | "X" ) { hexadecimal_digit }
 
 ### Numeric types
 - Integers
-  - `byte` (8-bit signed integer)
-  - `int` (32-bit signed integer)
-  - `long` (64-bit signed integer)
+  - `i8` (8-bit signed integer)
+  - `i32` (32-bit signed integer)
+  - `i64` (64-bit signed integer)
 - Floating point
-  - `float` (32-bit floating point)
-  - `double` (64-bit floating point)
+  - `f32` (32-bit floating point)
+  - `f64` (64-bit floating point)
 
 ### Possible escape sequences within a string literal
 
