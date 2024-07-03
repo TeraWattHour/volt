@@ -37,9 +37,8 @@ typedef struct Expr {
         struct {
             Token token;
             union {
-                int32_t i;
-                int64_t l;
-                double d;
+                int64_t i;
+                double f;
             } value;
         } number;
     };
@@ -61,16 +60,6 @@ Parser parser_init(Lexer *lexer);
 void parser_free(Parser *parser);
 
 Expr *parser_parse_expr(Parser *parser);
-Expr *parser_parse_expr_comparison(Parser *parser);
-Expr *parser_parse_expr_equality(Parser *parser);
-Expr *parser_parse_expr_factor(Parser *parser);
-Expr *parser_parse_expr_term(Parser *parser);
-Expr *parser_parse_expr_unary(Parser *parser);
-Expr *parser_parse_expr_primary(Parser *parser);
-
-TokenKind parser_expect(Parser *parser, ...);
-
-void parser_grow_pool(Parser *parser);
 
 
 #endif //VOLT_PARSER_H

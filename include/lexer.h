@@ -57,6 +57,7 @@ typedef enum {
     TOKEN_DOT,
     TOKEN_PLUS,
     TOKEN_INCREMENT,
+    TOKEN_DECREMENT,
     TOKEN_MINUS,
     TOKEN_STAR,
     TOKEN_SLASH,
@@ -67,20 +68,17 @@ typedef enum {
     TOKEN_OR,
 } TokenKind;
 
-typedef struct {
+typedef struct Token {
     TokenKind kind;
     char *start;
     char *end;
     size_t line;
     size_t column;
     union {
-        int radix;
-    };
-    union {
         struct {
-            char *mantissa_start;
-            char *exponent_start;
-        } hex_literal;
+            int radix;
+            bool is_float;
+        } numeric_literal;
     };
 } Token;
 

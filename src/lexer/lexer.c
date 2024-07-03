@@ -86,7 +86,7 @@ Token lexer_next(Lexer *lexer) {
         case '/': TOKEN(SLASH);
         case '%': TOKEN(PERCENT);
         case '+': TOKEN2(INCREMENT, '+'); TOKEN(PLUS);
-        case '-': TOKEN(MINUS);
+        case '-': TOKEN2(DECREMENT, '-'); TOKEN(MINUS);
         case '&': TOKEN2(AND, '&'); TOKEN(AMPERSAND);
         case '|': TOKEN2(OR, '|'); TOKEN(PIPE);
         case '(': TOKEN(LPAREN);
@@ -201,6 +201,7 @@ void lexer_escape_sequence(Lexer *lexer) {
         case 'n':
         case 'r':
         case 't':
+        case 'a':
         case '0': advance(); break;
         case 'x': {
             advance();
@@ -351,6 +352,7 @@ char *token_kind_to_name(TokenKind kind) {
         CASE(DOT)
         CASE(PLUS)
         CASE(INCREMENT)
+        CASE(DECREMENT)
         CASE(MINUS)
         CASE(STAR)
         CASE(SLASH)
