@@ -1,7 +1,6 @@
 #include "hashtable.h"
 
-unsigned long djb2(const unsigned char *str)
-{
+unsigned long djb2(const unsigned char *str) {
     unsigned long hash = 5381;
     int c;
 
@@ -11,8 +10,7 @@ unsigned long djb2(const unsigned char *str)
     return hash;
 }
 
-unsigned long djb2_between(const unsigned char *start, const unsigned char *end)
-{
+unsigned long djb2_between(const unsigned char *start, const unsigned char *end) {
     unsigned long hash = 5381;
     int c;
 

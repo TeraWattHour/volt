@@ -36,14 +36,14 @@ Lexer lexer_init(const char *filename) {
     }
 
     if (fseek(file, 0, SEEK_END) != 0) {
-        fprintf(stderr, "ERROR %s: Could not seek to end of file\n", filename);
+        fprintf(stderr, "ERROR %s: Could not read file\n", filename);
         exit(1);
     }
 
     size_t source_len = ftell(file);
 
     if (fseek(file, 0, SEEK_SET) != 0) {
-        fprintf(stderr, "ERROR %s: Could not seek to start of file\n", filename);
+        fprintf(stderr, "ERROR %s: Could not read file\n", filename);
         exit(1);
     }
 
@@ -61,12 +61,12 @@ Lexer lexer_init(const char *filename) {
     }
 
     return (Lexer) {
-            .filename = filename,
-            .source_len = source_len,
-            .source = source,
-            .c = source,
-            .line = 1,
-            .column = 1
+        .filename = filename,
+        .source_len = source_len,
+        .source = source,
+        .c = source,
+        .line = 1,
+        .column = 1
     };
 }
 
@@ -82,16 +82,69 @@ Token lexer_next(Lexer *lexer) {
 
     switch (*lexer->c) {
         case '\0': TOKEN(EOF);
+        case '*': TOKEN(STAR);
+        case '/': TOKEN(SLASH);
+        case '%': TOKEN(PERCENT);
+        case '+': TOKEN2(INCREMENT, '+'); TOKEN(PLUS);
+        case '-': TOKEN(MINUS);
+        case '&': TOKEN2(AND, '&'); TOKEN(AMPERSAND);
+        case '|': TOKEN2(OR, '|'); TOKEN(PIPE);
         case '(': TOKEN(LPAREN);
         case '{': TOKEN(LBRACE);
         case '}': TOKEN(RBRACE);
         case ')': TOKEN(RPAREN);
+        case '[': TOKEN(LBRACKET);
+        case ']': TOKEN(RBRACKET);
         case '=': TOKEN2(EQUALS, '='); TOKEN(ASSIGN);
         case '!': TOKEN2(NEQ, '='); TOKEN(BANG);
         case '>': TOKEN2(GTE, '='); TOKEN(GT);
         case '<': TOKEN2(LTE, '='); TOKEN(LT);
         case ';': TOKEN(SEMICOLON);
         case '.': if (!isnumber(*(lexer->c + 1))) TOKEN(DOT);
+        case '\'': {
+            token.kind = TOKEN_RUNE;
+            advance();
+
+            if (*lexer->c == '\\') {
+                lexer_escape_sequence(lexer);
+            } else {
+                lexer->c += utf8_width(*lexer->c);
+                lexer->column++;
+            }
+
+            if (*lexer->c != '\'') {
+                ERROR("Expected closing `\'` for rune literal\n");
+            }
+
+            advance();
+
+            token.end = lexer->c;
+
+            return token;
+        }
+        case '"': {
+            token.kind = TOKEN_STRING;
+            advance();
+
+            while (*lexer->c && *lexer->c != '"') {
+                if (*lexer->c == '\\') {
+                    lexer_escape_sequence(lexer);
+                } else {
+                    lexer->c += utf8_width(*lexer->c);
+                    lexer->column++;
+                }
+            }
+
+            if (*lexer->c != '"') {
+                ERROR("Expected closing `\"` for string literal\n");
+            }
+
+            advance();
+
+            token.end = lexer->c;
+
+            return token;
+        }
         default: {
             int width = utf8_width(*lexer->c);
 
@@ -119,7 +172,7 @@ Token lexer_next(Lexer *lexer) {
                     lexer_scan_octal(lexer, &token);
                 } else {
                     if (*lexer->c == '0' && isdigit(*(lexer->c + 1))) {
-                        ERROR("Unexpected recurring 0 in numeric literal\n");
+                        ERROR("Unexpected recurring `0` in numeric literal\n");
                     }
 
                     lexer_scan_decimal(lexer, &token);
@@ -128,26 +181,6 @@ Token lexer_next(Lexer *lexer) {
                 if (!is_huggable(*lexer->c)) {
                     ERROR("Unexpected character `%c` after numeric literal\n", *lexer->c);
                 }
-
-                return token;
-            } else if (*lexer->c == '\'') {
-                token.kind = TOKEN_RUNE;
-                advance();
-
-                if (*lexer->c == '\\') {
-                    lexer_escape_sequence(lexer);
-                } else {
-                    lexer->c += utf8_width(*lexer->c);
-                    lexer->column++;
-                }
-
-                if (*lexer->c != '\'') {
-                    ERROR("Expected closing `\'` for rune literal\n");
-                }
-
-                advance();
-
-                token.end = lexer->c;
 
                 return token;
             }
@@ -250,7 +283,7 @@ int lexer_free(Lexer *lexer) {
 
 TokenKind identifier_kind(const unsigned char *start, const unsigned char *end) {
     for (size_t i = 0; i < sizeof(keyword_mappings) / sizeof(keyword_mappings[0]); i++) {
-        if (strncmp((const char *)start, keyword_mappings[i].keyword, (int)(end - start)) == 0) {
+        if (strlen(keyword_mappings[i].keyword) == (int)(end - start) && strncmp((const char *)start, keyword_mappings[i].keyword, (int)(end - start)) == 0) {
             return keyword_mappings[i].kind;
         }
     }
@@ -276,11 +309,12 @@ bool is_spacer(char c) {
     return c == '_' || c == '\'';
 }
 
-bool is_huggable(char c) { return !isascii(c) || !isalnum(c) && c != '_'; }
+bool is_huggable(char c) { return c != '_' && (!isascii(c) || !isalnum(c)); }
 
 char *token_kind_to_name(TokenKind kind) {
 #define CASE(name) case TOKEN_##name: return #name;
     switch (kind) {
+        CASE(UNEXPECTED)
         CASE(EOF)
         CASE(IDENTIFIER)
         CASE(NUMBER)
@@ -315,6 +349,18 @@ char *token_kind_to_name(TokenKind kind) {
         CASE(EQ)
         CASE(BANG)
         CASE(DOT)
+        CASE(PLUS)
+        CASE(INCREMENT)
+        CASE(MINUS)
+        CASE(STAR)
+        CASE(SLASH)
+        CASE(PERCENT)
+        CASE(AMPERSAND)
+        CASE(PIPE)
+        CASE(AND)
+        CASE(OR)
+        CASE(LBRACKET)
+        CASE(RBRACKET)
     }
 
     assert(false && "Unknown token kind");

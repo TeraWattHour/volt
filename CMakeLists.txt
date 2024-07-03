@@ -10,4 +10,5 @@ add_executable(volt
     src/hashtable.c
     src/utf8.c
     src/lexer/lexer.c src/lexer/numeric_literals.c
+    src/parser/parser.c
 )

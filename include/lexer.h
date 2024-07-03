@@ -18,6 +18,7 @@ typedef struct {
 } Lexer;
 
 typedef enum {
+    TOKEN_UNEXPECTED,
     TOKEN_EOF,
     TOKEN_IDENTIFIER,
     TOKEN_NUMBER,
@@ -27,6 +28,8 @@ typedef enum {
     TOKEN_RPAREN,
     TOKEN_LBRACE,
     TOKEN_RBRACE,
+    TOKEN_LBRACKET,
+    TOKEN_RBRACKET,
     TOKEN_TRUE,
     TOKEN_FALSE,
     TOKEN_NIL,
@@ -52,6 +55,16 @@ typedef enum {
     TOKEN_EQ,
     TOKEN_BANG,
     TOKEN_DOT,
+    TOKEN_PLUS,
+    TOKEN_INCREMENT,
+    TOKEN_MINUS,
+    TOKEN_STAR,
+    TOKEN_SLASH,
+    TOKEN_PERCENT,
+    TOKEN_AMPERSAND,
+    TOKEN_PIPE,
+    TOKEN_AND,
+    TOKEN_OR,
 } TokenKind;
 
 typedef struct {
