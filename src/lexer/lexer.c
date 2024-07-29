@@ -95,7 +95,7 @@ Token lexer_next(Lexer *lexer) {
         case ')': TOKEN(RPAREN);
         case '[': TOKEN(LBRACKET);
         case ']': TOKEN(RBRACKET);
-        case '=': TOKEN2(EQUALS, '='); TOKEN(ASSIGN);
+        case '=': TOKEN2(EQ, '='); TOKEN(ASSIGN);
         case '!': TOKEN2(NEQ, '='); TOKEN(BANG);
         case '>': TOKEN2(GTE, '='); TOKEN(GT);
         case '<': TOKEN2(LTE, '='); TOKEN(LT);
@@ -341,7 +341,6 @@ char *token_kind_to_name(TokenKind kind) {
         CASE(MATCH)
         CASE(SEMICOLON)
         CASE(ASSIGN)
-        CASE(EQUALS)
         CASE(GT)
         CASE(LT)
         CASE(LTE)

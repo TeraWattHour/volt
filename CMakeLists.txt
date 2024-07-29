@@ -3,12 +3,15 @@ project(volt C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(${PROJECT_SOURCE_DIR}/include)
+set(SRC_DIR "${CMAKE_SOURCE_DIR}/src")
 
-add_executable(volt
-    main.c
-    src/hashtable.c
-    src/utf8.c
-    src/lexer/lexer.c src/lexer/numeric_literals.c
-    src/parser/parser.c
+include_directories(
+    "${SRC_DIR}"
+    "${SRC_DIR}/ast"
+    "${SRC_DIR}/lexer"
+    "${SRC_DIR}/parser"
 )
+
+file(GLOB_RECURSE C_FILES "${SRC_DIR}/*.c")
+
+add_executable(volt ${C_FILES})

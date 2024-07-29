@@ -1,3 +1,0 @@
-CheckOptions:
-  - value: misc-no-recursion
-    key: '0'

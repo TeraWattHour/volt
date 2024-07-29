@@ -46,7 +46,6 @@ typedef enum {
     TOKEN_MATCH,
     TOKEN_SEMICOLON,
     TOKEN_ASSIGN,
-    TOKEN_EQUALS,
     TOKEN_GT,
     TOKEN_LT,
     TOKEN_LTE,

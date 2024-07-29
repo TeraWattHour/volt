@@ -4,6 +4,16 @@
 #include <stdint.h>
 #include "lexer.h"
 
+typedef struct Stmt {
+    TokenKind kind;
+    union {
+        struct {
+            Token name;
+            struct Expr *value;
+        } let;
+    };
+} Stmt;
+
 typedef enum {
     EXPR_INFIX,
     EXPR_PREFIX,
@@ -50,16 +60,22 @@ typedef struct {
     Token current;
     Token next;
 
-    Expr *pool;
-    size_t pool_size;
-    size_t pool_capacity;
+    Expr *expr_pool;
+    size_t expr_pool_size;
+    size_t expr_pool_capacity;
+
+    Stmt *stmt_pool;
+    size_t stmt_pool_size;
+    size_t stmt_pool_capacity;
 } Parser;
 
 
 Parser parser_init(Lexer *lexer);
 void parser_free(Parser *parser);
+bool parser_expect(Parser *parser, TokenKind kind);
 
-Expr *parser_parse_expr(Parser *parser);
+Stmt *parser_let(Parser *parser);
+Expr *parser_expression(Parser *parser);
 
 
 #endif //VOLT_PARSER_H
