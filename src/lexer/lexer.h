@@ -44,7 +44,6 @@ enum class TokenKind {
     SEMICOLON,
     COLON_COLON,
     COLON,
-    SCOPE,
 
     ASSIGN,
     GT,

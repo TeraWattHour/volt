@@ -245,7 +245,7 @@ std::ostream &operator<<(std::ostream &os, const TokenKind &kind) {
 
         CASE(SEMICOLON)
         CASE(COLON)
-        CASE(SCOPE)
+        CASE(COLON_COLON)
 
         CASE(ASSIGN)
         CASE(GT)

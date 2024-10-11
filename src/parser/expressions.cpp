@@ -2,10 +2,14 @@
 #include "parser_macros.h"
 
 int number_base(std::string literal) {
-    if (literal.starts_with("0b")) return 2;
-    if (literal.starts_with("0o")) return 8;
-    if (literal.starts_with("0x")) return 16;
-    return 10;
+    if (literal.length() <= 2) return 10;
+    
+    switch (literal[1]) {
+        case 'b': return 2;
+        case 'x': return 16;
+        case 'o': return 8;
+        default: return 10;
+    }
 }
 
 std::unique_ptr<Expr> Parser::expression() {
